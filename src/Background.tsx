@@ -17,7 +17,7 @@ const Background: React.FC = () => {
     return positions
   }, [])
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (ref.current) {
       const positions = ref.current.geometry.attributes.position.array as Float32Array
       for (let i = 0; i < positions.length; i += 3) {

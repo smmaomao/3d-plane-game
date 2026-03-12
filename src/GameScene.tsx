@@ -1,25 +1,22 @@
 import React, { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Sphere, Box, Cylinder, MeshDistortMaterial } from '@react-three/drei'
-import * as THREE from 'three'
 import Player from './Player'
 import Enemy from './Enemy'
 import Bullet from './Bullet'
 import PowerUpItem from './PowerUpItem'
 import Background from './Background'
+import Explosion from './Explosion'
 import { useGameStore } from './gameStore'
 
 const GameScene: React.FC = () => {
   const { 
     gameState,
-    level,
     updateBullets, 
     updateEnemies, 
     updatePowerUps,
     updateTime,
     spawnEnemy,
-    bossActive,
-    timeRemaining
+    bossActive
   } = useGameStore()
   
   const lastSpawnRef = useRef(0)
@@ -43,13 +40,25 @@ const GameScene: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [gameState])
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (gameState !== 'playing') return
 
     updateBullets(delta)
     updateEnemies(delta)
     updatePowerUps(delta)
     updateTime(delta)
+
+    const { enemies, playerX, playerY, damagePlayer, isPlayerInvincible, isPlayerExploding } = useGameStore.getState()
+    if (!isPlayerInvincible && !isPlayerExploding) {
+      enemies.forEach(enemy => {
+        const dx = enemy.x - playerX
+        const dy = enemy.y - playerY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        if (distance < 1.2) {
+          damagePlayer()
+        }
+      })
+    }
 
     const now = Date.now()
     if (now - lastSpawnRef.current > 2000 && !bossActive) {
@@ -67,7 +76,7 @@ const GameScene: React.FC = () => {
     }
   })
 
-  const { enemies, bullets, powerUps } = useGameStore()
+  const { enemies, bullets, powerUps, explosionPosition, isPlayerExploding, completePlayerExplosion, resetPlayerPosition } = useGameStore()
 
   return (
     <>
@@ -85,7 +94,19 @@ const GameScene: React.FC = () => {
         <PowerUpItem key={powerUp.id} powerUp={powerUp} />
       ))}
       
-      <Player />
+      {!isPlayerExploding && <Player />}
+      
+      {explosionPosition && (
+        <Explosion 
+          position={explosionPosition} 
+          onComplete={() => {
+            if (useGameStore.getState().playerHealth > 0) {
+              resetPlayerPosition()
+            }
+            completePlayerExplosion()
+          }} 
+        />
+      )}
     </>
   )
 }

@@ -29,7 +29,8 @@ import {
   useLoader,
   useStore,
   useThree
-} from "./chunk-7METYXW7.js";
+} from "./chunk-JPU2NQRZ.js";
+import "./chunk-7V2LOIRV.js";
 import "./chunk-XQGTKUGB.js";
 import "./chunk-MA2WHGMY.js";
 import "./chunk-ZC22LKFR.js";

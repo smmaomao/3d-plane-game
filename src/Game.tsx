@@ -25,10 +25,10 @@ const Game: React.FC = () => {
       position: 'relative'
     }}>
       <Canvas>
-        <PerspectiveCamera 
-          makeDefault 
-          position={[0, 2, 10]} 
-          fov={60}
+        <PerspectiveCamera
+          makeDefault
+          position={[0, -5, 12]}
+          fov={50}
           aspect={9/16}
         />
         <ambientLight intensity={0.5} />

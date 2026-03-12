@@ -76,14 +76,14 @@ const GameUI: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'rgba(0,0,0,0.8)',
+        background: 'rgba(0,0,0,0.9)',
         color: 'white',
         fontFamily: 'Arial, sans-serif'
       }}>
-        <h1 style={{ fontSize: '48px', marginBottom: '20px', color: '#F44336' }}>游戏结束</h1>
+        <h1 style={{ fontSize: '64px', marginBottom: '20px', color: '#F44336', fontWeight: 'bold', textShadow: '0 0 20px #F44336' }}>GAME OVER</h1>
         <p style={{ fontSize: '32px', marginBottom: '10px' }}>得分: {score}</p>
         <p style={{ fontSize: '24px', marginBottom: '40px' }}>关卡: {level}</p>
-        <button 
+        <button
           onClick={resetGame}
           style={{
             padding: '15px 30px',

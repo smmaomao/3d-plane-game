@@ -7,23 +7,30 @@ import Enemy from './Enemy'
 import Bullet from './Bullet'
 import PowerUpItem from './PowerUpItem'
 import Background from './Background'
+import Explosion from './Explosion'
 import { useGameStore } from './gameStore'
 
 const GameScene: React.FC = () => {
-  const { 
+  const {
     gameState,
     level,
-    updateBullets, 
-    updateEnemies, 
+    updateBullets,
+    updateEnemies,
     updatePowerUps,
     updateTime,
     spawnEnemy,
     bossActive,
-    timeRemaining
+    timeRemaining,
+    playerX,
+    playerY,
+    isPlayerExploding,
+    respawnPlayer,
+    gameState: currentGameState
   } = useGameStore()
-  
+
   const lastSpawnRef = useRef(0)
   const lastShootRef = useRef(0)
+  const explosionHandledRef = useRef(false)
 
   useEffect(() => {
     if (gameState !== 'playing') return
@@ -67,25 +74,39 @@ const GameScene: React.FC = () => {
     }
   })
 
-  const { enemies, bullets, powerUps } = useGameStore()
+  const { enemies, bullets, powerUps, isPlayerInvincible } = useGameStore()
+
+  const handleExplosionComplete = () => {
+    if (currentGameState !== 'gameOver') {
+      respawnPlayer()
+    }
+    explosionHandledRef.current = false
+  }
 
   return (
     <>
       <Background />
-      
+
       {enemies.map(enemy => (
         <Enemy key={enemy.id} enemy={enemy} />
       ))}
-      
+
       {bullets.map(bullet => (
         <Bullet key={bullet.id} bullet={bullet} />
       ))}
-      
+
       {powerUps.map(powerUp => (
         <PowerUpItem key={powerUp.id} powerUp={powerUp} />
       ))}
-      
-      <Player />
+
+      {isPlayerExploding && (
+        <Explosion
+          position={[playerX, playerY, 0]}
+          onComplete={handleExplosionComplete}
+        />
+      )}
+
+      {!isPlayerExploding && <Player />}
     </>
   )
 }

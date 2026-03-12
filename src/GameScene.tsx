@@ -17,6 +17,8 @@ const GameScene: React.FC = () => {
     updateEnemies, 
     updatePowerUps,
     updateTime,
+    updatePlayerState,
+    checkEnemyCollision,
     spawnEnemy,
     bossActive,
     timeRemaining
@@ -50,6 +52,8 @@ const GameScene: React.FC = () => {
     updateEnemies(delta)
     updatePowerUps(delta)
     updateTime(delta)
+    updatePlayerState(delta)
+    checkEnemyCollision()
 
     const now = Date.now()
     if (now - lastSpawnRef.current > 2000 && !bossActive) {
@@ -73,19 +77,19 @@ const GameScene: React.FC = () => {
     <>
       <Background />
       
-      {enemies.map(enemy => (
+      {gameState === 'playing' && enemies.map(enemy => (
         <Enemy key={enemy.id} enemy={enemy} />
       ))}
       
-      {bullets.map(bullet => (
+      {gameState === 'playing' && bullets.map(bullet => (
         <Bullet key={bullet.id} bullet={bullet} />
       ))}
       
-      {powerUps.map(powerUp => (
+      {gameState === 'playing' && powerUps.map(powerUp => (
         <PowerUpItem key={powerUp.id} powerUp={powerUp} />
       ))}
       
-      <Player />
+      {gameState === 'playing' && <Player />}
     </>
   )
 }

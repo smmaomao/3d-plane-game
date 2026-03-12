@@ -2,6 +2,24 @@ import {
   Events
 } from "./chunk-6XIAPA35.js";
 import {
+  require_client
+} from "./chunk-XOBNGHDM.js";
+import "./chunk-OFNOTCVY.js";
+import {
+  addAfterEffect,
+  addEffect,
+  applyProps,
+  clear,
+  context,
+  createPortal,
+  extend,
+  preload,
+  suspend,
+  useFrame,
+  useLoader,
+  useThree
+} from "./chunk-MPC3Y4DF.js";
+import {
   AddEquation,
   AdditiveBlending,
   AlwaysStencilFunc,
@@ -194,31 +212,15 @@ import {
   WebGLRenderer,
   WireframeGeometry,
   ZeroFactor,
-  addAfterEffect,
-  addEffect,
-  applyProps,
-  clear,
-  context,
-  createPortal,
-  extend,
-  preload,
-  suspend,
-  three_module_exports,
-  useFrame,
-  useLoader,
-  useThree
-} from "./chunk-7METYXW7.js";
-import "./chunk-XQGTKUGB.js";
+  three_module_exports
+} from "./chunk-SGBOTT27.js";
+import "./chunk-QFJ3OP4C.js";
 import {
   create
-} from "./chunk-OUZ343ZT.js";
-import {
-  require_client
-} from "./chunk-UW4WI7CB.js";
-import "./chunk-YDN3S23L.js";
+} from "./chunk-4CY4VGLD.js";
 import {
   require_react
-} from "./chunk-MA2WHGMY.js";
+} from "./chunk-6UUHZ3XZ.js";
 import {
   __commonJS,
   __export,
@@ -116258,7 +116260,7 @@ var FaceLandmarker = (0, import_react39.forwardRef)(({
     const {
       FilesetResolver,
       FaceLandmarker: FaceLandmarker2
-    } = await import("./vision_bundle-AER2YTVG.js");
+    } = await import("./vision_bundle-KVFH6577.js");
     const vision = await FilesetResolver.forVisionTasks(basePath);
     return FaceLandmarker2.createFromOptions(vision, options);
   }, [basePath, opts]);

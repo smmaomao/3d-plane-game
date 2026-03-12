@@ -27,12 +27,12 @@ const Game: React.FC = () => {
       <Canvas>
         <PerspectiveCamera 
           makeDefault 
-          position={[0, 2, 10]} 
+          position={[0, -3, 15]} 
           fov={60}
-          aspect={9/16}
         />
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.8} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
+        <pointLight position={[0, -7, 5]} intensity={1} color="#4CAF50" />
         <Environment preset="night" />
         <GameScene />
       </Canvas>

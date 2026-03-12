@@ -29,6 +29,10 @@ interface GameState {
   playerX: number
   playerY: number
   playerHealth: number
+  playerLives: number
+  isPlayerExploding: boolean
+  explosionTime: number
+  isPlayerVisible: boolean
   score: number
   level: number
   gameState: 'menu' | 'playing' | 'gameOver' | 'levelComplete'
@@ -49,7 +53,9 @@ interface GameState {
   spawnPowerUp: (type: PowerUpType, x: number, y: number) => void
   activatePowerUp: (type: PowerUpType) => void
   updatePowerUps: (delta: number) => void
+  updatePlayerState: (delta: number) => void
   damagePlayer: () => void
+  checkEnemyCollision: () => void
   damageEnemy: (id: string, amount: number) => void
   startGame: () => void
   nextLevel: () => void
@@ -59,8 +65,12 @@ interface GameState {
 
 export const useGameStore = create<GameState>((set, get) => ({
   playerX: 0,
-  playerY: -8,
+  playerY: -7,
   playerHealth: 3,
+  playerLives: 3,
+  isPlayerExploding: false,
+  explosionTime: 0,
+  isPlayerVisible: true,
   score: 0,
   level: 1,
   gameState: 'menu',
@@ -72,13 +82,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   timeRemaining: 60,
   bossActive: false,
 
-  movePlayer: (x, y) => set(state => ({
-    playerX: Math.max(-4, Math.min(4, state.playerX + x)),
-    playerY: Math.max(-9, Math.min(0, state.playerY + y))
-  })),
+  movePlayer: (x, y) => {
+    const { isPlayerExploding, isPlayerVisible } = get()
+    if (isPlayerExploding || !isPlayerVisible) return
+    set(state => ({
+      playerX: Math.max(-4, Math.min(4, state.playerX + x)),
+      playerY: Math.max(-9, Math.min(0, state.playerY + y))
+    }))
+  },
 
   shoot: () => {
-    const { playerX, playerY, activePowerUp, bullets } = get()
+    const { playerX, playerY, activePowerUp, bullets, isPlayerExploding, isPlayerVisible } = get()
+    if (isPlayerExploding || !isPlayerVisible) return
     const newBullets = [...bullets]
     const baseId = Date.now().toString()
 
@@ -126,7 +141,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   updateBullets: (delta) => {
-    const { bullets, enemies, playerX, playerY, damageEnemy, damagePlayer } = get()
+    const { bullets, enemies, playerX, playerY, damageEnemy, damagePlayer, isPlayerExploding, isPlayerVisible } = get()
     const updatedBullets = bullets
       .map(b => ({
         ...b,
@@ -148,12 +163,14 @@ export const useGameStore = create<GameState>((set, get) => ({
           }
         })
       } else {
-        const dx = bullet.x - playerX
-        const dy = bullet.y - playerY
-        const distance = Math.sqrt(dx * dx + dy * dy)
-        if (distance < 0.8) {
-          bulletsToRemove.add(bullet.id)
-          damagePlayer()
+        if (!isPlayerExploding && isPlayerVisible) {
+          const dx = bullet.x - playerX
+          const dy = bullet.y - playerY
+          const distance = Math.sqrt(dx * dx + dy * dy)
+          if (distance < 0.8) {
+            bulletsToRemove.add(bullet.id)
+            damagePlayer()
+          }
         }
       }
     })
@@ -225,11 +242,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   updatePowerUps: (delta) => {
-    const { powerUps, playerX, playerY, activatePowerUp, activePowerUp, powerUpEndTime } = get()
+    const { powerUps, playerX, playerY, activatePowerUp, activePowerUp, powerUpEndTime, isPlayerExploding, isPlayerVisible } = get()
     
     if (activePowerUp && Date.now() > powerUpEndTime) {
       set({ activePowerUp: null })
     }
+
+    if (isPlayerExploding || !isPlayerVisible) return
 
     const powerUpsToRemove = new Set<string>()
     const updatedPowerUps = powerUps.map(p => ({ ...p, y: p.y - 0.05 }))
@@ -249,13 +268,55 @@ export const useGameStore = create<GameState>((set, get) => ({
     })
   },
 
-  damagePlayer: () => {
-    set(state => {
-      const newHealth = state.playerHealth - 1
-      if (newHealth <= 0) {
-        return { playerHealth: 0, gameState: 'gameOver' }
+  updatePlayerState: (delta) => {
+    const { isPlayerExploding, explosionTime, playerLives } = get()
+    
+    if (isPlayerExploding) {
+      const now = Date.now()
+      if (now - explosionTime > 500) {
+        if (playerLives <= 0) {
+          set({ 
+            gameState: 'gameOver',
+            isPlayerExploding: false,
+            isPlayerVisible: false
+          })
+        } else {
+          set({
+            isPlayerExploding: false,
+            isPlayerVisible: true,
+            playerX: 0,
+            playerY: -7
+          })
+        }
       }
-      return { playerHealth: newHealth }
+    }
+  },
+
+  damagePlayer: () => {
+    const { isPlayerExploding, playerLives } = get()
+    if (isPlayerExploding) return
+    
+    const newLives = playerLives - 1
+    set({
+      playerLives: newLives,
+      isPlayerExploding: true,
+      explosionTime: Date.now(),
+      isPlayerVisible: false
+    })
+  },
+
+  checkEnemyCollision: () => {
+    const { enemies, playerX, playerY, isPlayerExploding, isPlayerVisible, damagePlayer } = get()
+    if (isPlayerExploding || !isPlayerVisible) return
+
+    enemies.forEach(enemy => {
+      const dx = enemy.x - playerX
+      const dy = enemy.y - playerY
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      const collisionDistance = enemy.type === 'boss' ? 2.5 : enemy.type === 'medium' ? 1 : 0.6
+      if (distance < collisionDistance) {
+        damagePlayer()
+      }
     })
   },
 
@@ -301,7 +362,13 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   startGame: () => set({ 
     gameState: 'playing',
+    playerX: 0,
+    playerY: -7,
     playerHealth: 3,
+    playerLives: 3,
+    isPlayerExploding: false,
+    explosionTime: 0,
+    isPlayerVisible: true,
     score: 0,
     level: 1,
     timeRemaining: 60,
@@ -337,8 +404,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   resetGame: () => set({
     playerX: 0,
-    playerY: -8,
+    playerY: -7,
     playerHealth: 3,
+    playerLives: 3,
+    isPlayerExploding: false,
+    explosionTime: 0,
+    isPlayerVisible: true,
     score: 0,
     level: 1,
     gameState: 'menu',

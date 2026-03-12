@@ -39,6 +39,9 @@ interface GameState {
   powerUpEndTime: number
   timeRemaining: number
   bossActive: boolean
+  isPlayerInvincible: boolean
+  isPlayerExploding: boolean
+  playerRespawnTime: number
 
   movePlayer: (x: number, y: number) => void
   shoot: () => void
@@ -55,6 +58,8 @@ interface GameState {
   nextLevel: () => void
   updateTime: (delta: number) => void
   resetGame: () => void
+  respawnPlayer: () => void
+  setPlayerExploding: (exploding: boolean) => void
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -71,6 +76,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   powerUpEndTime: 0,
   timeRemaining: 60,
   bossActive: false,
+  isPlayerInvincible: false,
+  isPlayerExploding: false,
+  playerRespawnTime: 0,
 
   movePlayer: (x, y) => set(state => ({
     playerX: Math.max(-4, Math.min(4, state.playerX + x)),
@@ -164,7 +172,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   updateEnemies: (delta) => {
-    const { enemies, playerX } = get()
+    const { enemies, playerX, playerY, damagePlayer, isPlayerInvincible, isPlayerExploding } = get()
     const updatedEnemies = enemies.map(e => {
       let newY = e.y
       let newX = e.x
@@ -179,7 +187,22 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
 
       return { ...e, x: newX, y: newY }
-    }).filter(e => e.y > -10)
+    }).filter(e => {
+      if (e.y <= -10) return false
+      
+      if (!isPlayerInvincible && !isPlayerExploding) {
+        const dx = e.x - playerX
+        const dy = e.y - playerY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        const collisionDistance = e.type === 'boss' ? 2.5 : e.type === 'medium' ? 1 : 0.8
+        if (distance < collisionDistance) {
+          damagePlayer()
+          return false
+        }
+      }
+      
+      return true
+    })
 
     set({ enemies: updatedEnemies })
   },
@@ -250,13 +273,36 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   damagePlayer: () => {
-    set(state => {
-      const newHealth = state.playerHealth - 1
-      if (newHealth <= 0) {
-        return { playerHealth: 0, gameState: 'gameOver' }
-      }
-      return { playerHealth: newHealth }
+    const { isPlayerInvincible, isPlayerExploding, playerHealth } = get()
+    if (isPlayerInvincible || isPlayerExploding) return
+
+    const newHealth = playerHealth - 1
+    if (newHealth <= 0) {
+      set({ playerHealth: 0, gameState: 'gameOver', isPlayerExploding: true })
+    } else {
+      set({ 
+        playerHealth: newHealth, 
+        isPlayerExploding: true,
+        isPlayerInvincible: true 
+      })
+    }
+  },
+
+  setPlayerExploding: (exploding: boolean) => {
+    set({ isPlayerExploding: exploding })
+  },
+
+  respawnPlayer: () => {
+    set({ 
+      playerX: 0,
+      playerY: -8,
+      isPlayerExploding: false,
+      isPlayerInvincible: true,
+      playerRespawnTime: Date.now() + 2000
     })
+    setTimeout(() => {
+      set({ isPlayerInvincible: false })
+    }, 2000)
   },
 
   damageEnemy: (id, amount) => {
@@ -299,7 +345,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  startGame: () => set({ 
+  startGame: () => set({
     gameState: 'playing',
     playerHealth: 3,
     score: 0,
@@ -309,7 +355,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     enemies: [],
     bullets: [],
     powerUps: [],
-    activePowerUp: null
+    activePowerUp: null,
+    isPlayerInvincible: false,
+    isPlayerExploding: false,
+    playerRespawnTime: 0,
+    playerX: 0,
+    playerY: -8
   }),
 
   nextLevel: () => set(state => ({
@@ -348,6 +399,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     activePowerUp: null,
     powerUpEndTime: 0,
     timeRemaining: 60,
-    bossActive: false
+    bossActive: false,
+    isPlayerInvincible: false,
+    isPlayerExploding: false,
+    playerRespawnTime: 0
   })
 }))

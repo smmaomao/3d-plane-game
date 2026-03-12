@@ -1,6 +1,6 @@
 import {
   require_react
-} from "./chunk-MA2WHGMY.js";
+} from "./chunk-6UUHZ3XZ.js";
 import {
   __commonJS
 } from "./chunk-ZC22LKFR.js";

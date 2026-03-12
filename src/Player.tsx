@@ -17,35 +17,53 @@ const Player: React.FC = () => {
 
   return (
     <group ref={groupRef} position={[playerX, playerY, 0]}>
-      <Cone args={[0.5, 1, 8]} position={[0, 0, 0]} rotation={[Math.PI, 0, 0]}>
-        <meshStandardMaterial color="#4CAF50" metalness={0.5} roughness={0.3} />
+      {/* 飞机机身 - 主体 */}
+      <Cone args={[0.8, 2, 8]} position={[0, 0, 0]} rotation={[Math.PI, 0, 0]}>
+        <meshStandardMaterial color="#00FF00" metalness={0.3} roughness={0.4} emissive="#00AA00" emissiveIntensity={0.2} />
       </Cone>
-      
-      <Box args={[0.8, 0.3, 0.3]} position={[0, -0.2, 0]}>
-        <meshStandardMaterial color="#2E7D32" />
+
+      {/* 飞机翅膀 - 主机翼 */}
+      <Box args={[2.5, 0.5, 0.4]} position={[0, -0.3, 0]}>
+        <meshStandardMaterial color="#00CC00" />
       </Box>
-      
-      <Cone args={[0.2, 0.5, 4]} position={[-0.3, -0.4, 0]} rotation={[Math.PI, 0, 0]}>
-        <meshStandardMaterial color="#1B5E20" />
+
+      {/* 左翼 */}
+      <Cone args={[0.4, 1, 4]} position={[-1, -0.5, 0]} rotation={[Math.PI, 0, -0.3]}>
+        <meshStandardMaterial color="#009900" />
       </Cone>
-      <Cone args={[0.2, 0.5, 4]} position={[0.3, -0.4, 0]} rotation={[Math.PI, 0, 0]}>
-        <meshStandardMaterial color="#1B5E20" />
+      {/* 右翼 */}
+      <Cone args={[0.4, 1, 4]} position={[1, -0.5, 0]} rotation={[Math.PI, 0, 0.3]}>
+        <meshStandardMaterial color="#009900" />
       </Cone>
-      
-      <Sphere args={[0.15]} position={[0, 0.3, 0]}>
-        <meshStandardMaterial 
-          color={activePowerUp ? '#FFEB3B' : '#81D4FA'} 
-          emissive={activePowerUp ? '#FFEB3B' : '#81D4FA'}
-          emissiveIntensity={0.5}
+
+      {/* 尾翼 */}
+      <Box args={[1, 0.3, 0.2]} position={[0, -1.2, 0]}>
+        <meshStandardMaterial color="#008800" />
+      </Box>
+
+      {/* 驾驶舱 */}
+      <Sphere args={[0.35]} position={[0, 0.5, 0]}>
+        <meshStandardMaterial
+          color={activePowerUp ? '#FFFF00' : '#00FFFF'}
+          emissive={activePowerUp ? '#FFFF00' : '#00FFFF'}
+          emissiveIntensity={0.6}
         />
       </Sphere>
-      
+
+      {/* 引擎发光效果 */}
+      <Sphere args={[0.2]} position={[-0.6, -0.8, 0]}>
+        <meshBasicMaterial color="#FF6600" />
+      </Sphere>
+      <Sphere args={[0.2]} position={[0.6, -0.8, 0]}>
+        <meshBasicMaterial color="#FF6600" />
+      </Sphere>
+
       {activePowerUp === 'missile' && (
         <>
-          <Box args={[0.1, 0.3, 0.1]} position={[-0.6, 0, 0]}>
+          <Box args={[0.2, 0.6, 0.2]} position={[-1.2, 0, 0]}>
             <meshStandardMaterial color="#FF5722" />
           </Box>
-          <Box args={[0.1, 0.3, 0.1]} position={[0.6, 0, 0]}>
+          <Box args={[0.2, 0.6, 0.2]} position={[1.2, 0, 0]}>
             <meshStandardMaterial color="#FF5722" />
           </Box>
         </>

@@ -4,7 +4,7 @@ import { useGameStore } from './gameStore'
 const GameUI: React.FC = () => {
   const { 
     gameState, 
-    playerHealth, 
+    playerLives, 
     score, 
     level, 
     timeRemaining,
@@ -80,7 +80,7 @@ const GameUI: React.FC = () => {
         color: 'white',
         fontFamily: 'Arial, sans-serif'
       }}>
-        <h1 style={{ fontSize: '48px', marginBottom: '20px', color: '#F44336' }}>游戏结束</h1>
+        <h1 style={{ fontSize: '64px', marginBottom: '20px', color: '#F44336', fontWeight: 'bold' }}>GAME OVER</h1>
         <p style={{ fontSize: '32px', marginBottom: '10px' }}>得分: {score}</p>
         <p style={{ fontSize: '24px', marginBottom: '40px' }}>关卡: {level}</p>
         <button 
@@ -171,7 +171,7 @@ const GameUI: React.FC = () => {
     }}>
       <div>
         <p style={{ fontSize: '24px', margin: '0 0 10px 0' }}>
-          生命值: {'❤️'.repeat(playerHealth)}
+          生命: {'❤️'.repeat(playerLives)}
         </p>
         <p style={{ fontSize: '20px', margin: 0 }}>得分: {score}</p>
       </div>
